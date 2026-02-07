@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Direcciones IP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: #dc2626;
+            color: white;
+            padding: 40px 30px;
+            border-bottom: 3px solid #991b1b;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a1a1a;
+            font-size: 0.9em;
+        }
+
+        .ip-input-container input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 3px;
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .ip-input-container input:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .calculate-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .calculate-btn:hover {
+            background: #b91c1c;
+        }
+
+        .calculate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            color: #92400e;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .results {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card {
+            background: #fafafa;
+            border-left: 3px solid #dc2626;
+            padding: 24px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+        }
+
+        .result-card h3 {
+            color: #dc2626;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #525252;
+            font-size: 0.9em;
+        }
+
+        .result-value {
+            color: #1a1a1a;
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 2px;
+            border: 1px solid #e5e5e5;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 2px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .badge-public {
+            background: #dc2626;
+            color: white;
+        }
+
+        .badge-private {
+            background: #f87171;
+            color: white;
+        }
+
+        .badge-special {
+            background: #991b1b;
+            color: white;
+        }
+
+        .binary-section {
+            background: #1a1a1a;
+            color: #e5e5e5;
+            padding: 20px;
+            border-radius: 3px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.8;
+        }
+
+        .binary-line {
+            padding: 4px 0;
+        }
+
+        .binary-line strong {
+            color: #dc2626;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px;
+            border-radius: 3px;
+            margin-top: 20px;
+            border-left: 3px solid #dc2626;
+            font-size: 0.9em;
+        }
+
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 16px;
+            border-radius: 3px;
+            margin-top: 16px;
+            border-left: 3px solid #f59e0b;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Calculadora de Direcciones IP</h1>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <strong>Cálculo Automático de Prefijo</strong>
+                El sistema calculará automáticamente el prefijo basándose en la clase de la dirección.
+            </div>
+
+            <div class="input-group">
+                <label for="ipAddress">Dirección IP</label>
+                <div class="ip-input-container">
+                    <input type="text" id="ipAddress" placeholder="Ejemplo: 192.168.1.1">
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculateIP()">Calcular</button>
+
+            <div id="error" class="error" style="display: none;"></div>
+
+            <div id="results" class="results">
+                <div class="result-card">
+                    <h3>Información General</h3>
+                    <div class="result-item">
+                        <span class="result-label">Clase</span>
+                        <span class="result-value" id="class"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Prefijo</span>
+                        <span class="result-value" id="prefix"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Tipo de Red</span>
+                        <span id="networkType"></span>
+                    </div>
+                    <div id="warningMsg" class="warning" style="display: none;"></div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Direcciones de Red</h3>
+                    <div class="result-item">
+                        <span class="result-label">Dirección IP</span>
+                        <span class="result-value" id="ipAddr"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Máscara de Subred</span>
+                        <span class="result-value" id="subnetMask"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Dirección de Red</span>
+                        <span class="result-value" id="networkAddr"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Dirección Broadcast</span>
+                        <span class="result-value" id="broadcast"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Primera IP Usable</span>
+                        <span class="result-value" id="firstHost"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Última IP Usable</span>
+                        <span class="result-value" id="lastHost"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total de Hosts</span>
+                        <span class="result-value" id="totalHosts"></span>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Operaciones AND</h3>
+                    <div id="andOperation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function ipToBinary(ip) {
+            return ip.split('.').map(octet => {
+                return parseInt(octet).toString(2).padStart(8, '0');
+            }).join('.');
+        }
+
+        function binaryToIp(binary) {
+            return binary.split('.').map(octet => {
+                return parseInt(octet, 2);
+            }).join('.');
+        }
+
+        function getClass(firstOctet) {
+            if (firstOctet >= 1 && firstOctet <= 126) return 'A';
+            if (firstOctet >= 128 && firstOctet <= 191) return 'B';
+            if (firstOctet >= 192 && firstOctet <= 223) return 'C';
+            if (firstOctet >= 224 && firstOctet <= 239) return 'D (Multicast)';
+            if (firstOctet >= 240 && firstOctet <= 255) return 'E (Experimental)';
+            return 'Desconocida';
+        }
+
+        function getDefaultMask(ipClass) {
+            switch(ipClass) {
+                case 'A': return 8;
+                case 'B': return 16;
+                case 'C': return 24;
+                case 'D': return 4;  
+                case 'E': return 4;  
+                default: return 24;
+            }
+        }
+
+        function getNetworkType(ip) {
+            const octets = ip.split('.').map(Number);
+            const first = octets[0];
+            const second = octets[1];
+
+            if (first === 10) return { type: 'private', description: 'Privada (10.0.0.0/8)' };
+            if (first === 172 && second >= 16 && second <= 31) return { type: 'private', description: 'Privada (172.16.0.0/12)' };
+            if (first === 192 && second === 168) return { type: 'private', description: 'Privada (192.168.0.0/16)' };
+            
+            if (first === 127) return { type: 'special', description: 'Loopback' };
+            if (first === 0) return { type: 'special', description: 'Red Actual' };
+            if (first === 169 && second === 254) return { type: 'special', description: 'APIPA' };
+            if (first >= 224 && first <= 239) return { type: 'special', description: 'Multicast' };
+            if (first >= 240) return { type: 'special', description: 'Experimental' };
+            if (first === 255 && octets.every(o => o === 255)) return { type: 'special', description: 'Broadcast' };
+            
+            return { type: 'public', description: 'Pública' };
+        }
+
+        function cidrToMask(cidr) {
+            const mask = [];
+            for (let i = 0; i < 4; i++) {
+                const bits = Math.max(0, Math.min(8, cidr - (i * 8)));
+                mask.push(256 - Math.pow(2, 8 - bits));
+            }
+            return mask.join('.');
+        }
+
+        function andOperation(ip1, ip2) {
+            const octets1 = ip1.split('.').map(Number);
+            const octets2 = ip2.split('.').map(Number);
+            return octets1.map((octet, i) => octet & octets2[i]).join('.');
+        }
+
+        function calculateBroadcast(network, mask) {
+            const netOctets = network.split('.').map(Number);
+            const maskOctets = mask.split('.').map(Number);
+            return netOctets.map((octet, i) => octet | (255 - maskOctets[i])).join('.');
+        }
+
+        function validateIP(ip) {
+            const octets = ip.split('.');
+            if (octets.length !== 4) return false;
+            return octets.every(octet => {
+                const num = parseInt(octet);
+                return num >= 0 && num <= 255 && octet === num.toString();
+            });
+        }
+
+        function incrementIP(ip) {
+            const octets = ip.split('.').map(Number);
+            for (let i = 3; i >= 0; i--) {
+                if (octets[i] < 255) {
+                    octets[i]++;
+                    break;
+                } else {
+                    octets[i] = 0;
+                }
+            }
+            return octets.join('.');
+        }
+
+        function decrementIP(ip) {
+            const octets = ip.split('.').map(Number);
+            for (let i = 3; i >= 0; i--) {
+                if (octets[i] > 0) {
+                    octets[i]--;
+                    break;
+                } else {
+                    octets[i] = 255;
+                }
+            }
+            return octets.join('.');
+        }
+
+        function calculateIP() {
+            const ipInput = document.getElementById('ipAddress').value.trim();
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            const warningDiv = document.getElementById('warningMsg');
+
+            errorDiv.style.display = 'none';
+            warningDiv.style.display = 'none';
+            resultsDiv.classList.remove('show');
+
+            if (!ipInput) {
+                errorDiv.textContent = 'Por favor, ingrese una dirección IP';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (!validateIP(ipInput)) {
+                errorDiv.textContent = 'Por favor, ingrese una dirección IP válida (ej: 192.168.1.1)';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const octets = ipInput.split('.').map(Number);
+            const firstOctet = octets[0];
+            const ipClass = getClass(firstOctet);
+            
+            
+            const classLetter = ipClass.split(' ')[0]; 
+            const cidr = getDefaultMask(classLetter);
+
+            const subnetMask = cidrToMask(cidr);
+            const networkAddr = andOperation(ipInput, subnetMask);
+            const broadcast = calculateBroadcast(networkAddr, subnetMask);
+
+            let firstHost = 'N/A';
+            let lastHost = 'N/A';
+            let totalHosts = 0;
+
+            if (cidr === 32) {
+                firstHost = networkAddr;
+                lastHost = networkAddr;
+                totalHosts = 1;
+            } else if (cidr === 31) {
+                firstHost = networkAddr;
+                lastHost = broadcast;
+                totalHosts = 2;
+            } else {
+                firstHost = incrementIP(networkAddr);
+                lastHost = decrementIP(broadcast);
+                totalHosts = Math.pow(2, 32 - cidr) - 2;
+            }
+
+            const networkTypeInfo = getNetworkType(ipInput);
+
+            if (ipClass.includes('Multicast') || ipClass.includes('Experimental')) {
+                warningDiv.textContent = `Las direcciones de clase ${ipClass} no utilizan subredes tradicionales.`;
+                warningDiv.style.display = 'block';
+            }
+
+            document.getElementById('class').textContent = ipClass;
+            document.getElementById('prefix').textContent = '/' + cidr;
+            
+            let badgeClass = 'badge-public';
+            if (networkTypeInfo.type === 'private') badgeClass = 'badge-private';
+            if (networkTypeInfo.type === 'special') badgeClass = 'badge-special';
+            
+            document.getElementById('networkType').innerHTML = 
+                `<span class="badge ${badgeClass}">${networkTypeInfo.description}</span>`;
+            
+            document.getElementById('ipAddr').textContent = ipInput;
+            document.getElementById('subnetMask').textContent = subnetMask;
+            document.getElementById('networkAddr').textContent = networkAddr;
+            document.getElementById('broadcast').textContent = broadcast;
+            document.getElementById('firstHost').textContent = firstHost;
+            document.getElementById('lastHost').textContent = lastHost;
+            document.getElementById('totalHosts').textContent = totalHosts === 'N/A' ? 'N/A' : totalHosts.toLocaleString();
+
+            const ipBinary = ipToBinary(ipInput);
+            const maskBinary = ipToBinary(subnetMask);
+            const networkBinary = ipToBinary(networkAddr);
+
+            const andOperationHTML = `
+                <div class="binary-section">
+                    <div class="binary-line"><strong>IP (Binario):</strong><br>${ipBinary}</div>
+                    <div class="binary-line"><strong>Máscara (Binario):</strong><br>${maskBinary}</div>
+                    <div class="binary-line"><strong>AND =</strong></div>
+                    <div class="binary-line"><strong>Red (Binario):</strong><br>${networkBinary}</div>
+                    <div class="binary-line" style="margin-top: 15px;"><strong>Red (Decimal):</strong><br>${networkAddr}</div>
+                </div>
+            `;
+
+            document.getElementById('andOperation').innerHTML = andOperationHTML;
+
+            resultsDiv.classList.add('show');
+        }
+
+        document.getElementById('ipAddress').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') calculateIP();
+        });
+
+      
+        window.addEventListener('load', function() {
+            document.getElementById('ipAddress').focus();
+        });
+    </script>
+</body>
+</html>
